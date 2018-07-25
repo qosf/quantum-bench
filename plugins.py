@@ -1,3 +1,4 @@
+from logger import LoggerMixin
 from utils import classproperty
 
 
@@ -19,7 +20,7 @@ class PluginMount(type):
             cls.plugin_classes.append(cls)
 
 
-class Plugin(metaclass=PluginMount):
+class Plugin(LoggerMixin, metaclass=PluginMount):
     """
     Serves as a base class for all plugins.
     """

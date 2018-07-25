@@ -22,10 +22,16 @@ class EntryPoint(LoggerMixin):
     def load_configuration(self):
         pass
 
+    def collect_data(self):
+        for plugin_cls in Collector.plugin_classes:
+            plugin = plugin_cls()
+            plugin.run()
+
     def main(self):
         self.import_plugins()
         print(Collector.plugin_classes)
         print(Collector.plugins)
+        self.collect_data()
 
 
 def main():

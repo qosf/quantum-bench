@@ -20,9 +20,9 @@ class PluginMount(type):
             cls.plugin_classes.append(cls)
 
 
-class Plugin(LoggerMixin, metaclass=PluginMount):
+class Collector(LoggerMixin, metaclass=PluginMount):
     """
-    Serves as a base class for all plugins.
+    Serves as a base class for all collector classes.
     """
 
     @classproperty

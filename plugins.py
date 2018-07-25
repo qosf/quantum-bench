@@ -32,7 +32,7 @@ class Collector(LoggerMixin, metaclass=PluginMount):
         """
 
         return {
-            plugin_class.identifier: plugin_class
+            plugin_class.__name__: plugin_class
             for plugin_class in cls.plugin_classes
         }
 

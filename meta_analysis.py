@@ -4,12 +4,14 @@ from config import OAUTH_TOKEN
 
 class Repository(object):
 	
+	osi_license_ids = ["MPL-2.0", "GPL-2.0", "MIT", "LGPL-3.0", "BSD-2-Clause",
+			   "EPL-2.0", "Apache-2.0", "BSD-3-Clause", "GPL-3.0", "LGPL-2.1"]
+
 	def __init__(self, user_name, repo_name):
 		"""
 		Gets the repo with repo_name from user_name's profile
 		and already retrieves a list of all commits.
 		"""
-		
 		# create a Github instance with OAuth token
 		self.github = Github(OAUTH_TOKEN)
 		
@@ -52,10 +54,36 @@ class Repository(object):
 		"""	
 		return len([contributor for contributor in self.repo.get_stats_contributors()])
 		
-	def get_license(self):
+	def osi_license(self):
 		"""
-		Returns the license file
-		associated with the project.
+		Returns True if the license associated
+		with this repository is a valid OSI license.
+		"""
+		license_name = self.repo.get_license().license.spdx_id
+		return license_name in self.osi_license_ids
+
+	def has_issues_or_prs(self):
+		"""
+		Returns True if the repository has Issues
+		and Pull Requests from external people.
+		"""
+		if not self.repo.has_issues:
+			return False
+
+		issues = self.repo.get_issues()
+		for issue in issues:
+			if issue.user == self.repo.owner:
+				continue
+			# check if author of issue or PR is from the same company
+			if issue.user.company is not None:
+				if issue.user.company[1:-1] == self.user.login:
+					print('same company')
+		return True # dummy return
+
+	def core_developers(self):
+		"""
+		Returns a list of names of core
+		developers (>20% of code).
 		"""
 		pass
 

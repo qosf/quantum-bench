@@ -39,14 +39,10 @@ class Repository(object):
 		Returns True if the repository had at
 		least 20 commits in the past year.
 		"""
-		commits = self.commits()[:19]
-		for commit in commits:
-			commit_date_str = commit.stats.last_modified
-			commit_date = dt.datetime.strptime(commit_date_str[5:16], "%d %b %Y")
-			if (dt.datetime.now() - commit_date) > dt.timedelta(weeks=52):
-				return False
-			else:
-				return True
+		last_twenty_commits = self.commits[:19]
+		extract_date = lambda text_date: dt.datetime.strptime(text_date.stats.last_modified[5:16], "%d %b %Y")
+		in_past_year = lambda date: (dt.datetime.now() - date) < dt.timedelta(weeks=52)
+		return any(map(in_past_year, map(extract_date, last_twenty_commits)))
 
 	@property
 	def contributor_count(self):

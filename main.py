@@ -1,6 +1,8 @@
 import importlib
 from logger import LoggerMixin
 
+import yaml
+
 import collectors
 from plugins import Collector
 
@@ -20,7 +22,13 @@ class EntryPoint(LoggerMixin):
                 self.important(f"The module {module} could not be loaded: {exc}")
 
     def load_configuration(self):
-        pass
+        """
+        Loads configuration from the config file and determines the list of
+        projects.
+        """
+
+        config = yaml.load(open('config.yaml', 'r'))
+        self.projects = [Project.parse(spec) for spec in config['projects']]
 
     def collect_data(self):
         for plugin_cls in Collector.plugin_classes:
@@ -29,8 +37,7 @@ class EntryPoint(LoggerMixin):
 
     def main(self):
         self.import_plugins()
-        print(Collector.plugin_classes)
-        print(Collector.plugins)
+        self.load_configuration()
         self.collect_data()
 
 

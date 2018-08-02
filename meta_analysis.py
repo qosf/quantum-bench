@@ -1,4 +1,5 @@
 import datetime as dt
+from functools import reduce
 from github import Github
 from config import OAUTH_TOKEN
 
@@ -46,13 +47,28 @@ class Repository(object):
 		in_past_year = lambda date: (dt.datetime.now() - date) < dt.timedelta(weeks=52)
 		return any(map(in_past_year, map(extract_date, last_twenty_commits)))
 
+	def get_contributors(self):
+		"""
+		Returns a list of dictionaries. Each dictionary represents
+		as single contributor and provides their name and their
+		total number of additions and deletions.
+		"""
+		extract = lambda list_of_weeks, param: sum([week.a if param == 'a' else week.d
+							    for week in list_of_weeks]
+		)
+		return [{'name': contributor.author.login,
+				'additions': extract(contributor.weeks, 'a'),
+				'deletions': extract(contributor.weeks, 'd')}
+				for contributor in self.repo.get_stats_contributors()
+		]
+
 	@property
 	def contributor_count(self):
 		"""
 		Returns the number of contributors
 		for this project.
 		"""	
-		return len([contributor for contributor in self.repo.get_stats_contributors()])
+		return len(self.get_contributors())
 		
 	def osi_license(self):
 		"""
@@ -80,12 +96,28 @@ class Repository(object):
 					print('same company')
 		return True # dummy return
 
+	def total_adds_and_dels(self):
+		"""
+		Returns a dictionary with the total
+		number of additions and deletions
+		in this repository.
+		"""
+		stats = {}
+		stats['additions'] = reduce(lambda x, y: (x + y.additions) if type(x) is int else (x.additions + y.additions), self.repo.get_stats_code_frequency())
+		stats['deletions'] = reduce(lambda x, y: (x + y.deletions) if type(x) is int else (x.deletions + y.deletions), self.repo.get_stats_code_frequency())
+		return stats
+
 	def core_developers(self):
 		"""
 		Returns a list of names of core
 		developers (>20% of code).
 		"""
-		pass
+
+		adds_and_dels = self.total_adds_and_dels()
+
+		is_core_dev = lambda contributor: (contributor['additions']/adds_and_dels['additions'] > 0.10) or (contributor['deletions']/adds_and_dels['deletions']*-1 > 0.10)
+
+		return list(filter(is_core_dev, self.get_contributors()))
 
 import bpython
 bpython.embed(locals_=locals())

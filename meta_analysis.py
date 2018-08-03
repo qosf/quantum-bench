@@ -1,5 +1,7 @@
 import datetime as dt
 from functools import reduce
+from difflib import SequenceMatcher as SM
+
 from github import Github
 from config import OAUTH_TOKEN
 
@@ -53,12 +55,14 @@ class Repository(object):
 		as single contributor and provides their name and their
 		total number of additions and deletions.
 		"""
-		extract = lambda list_of_weeks, param: sum([week.a if param == 'a' else week.d
+		extract = lambda list_of_weeks, param: sum([week.a if param == 'a' else
+							    (week.d if param == 'd' else week.c)
 							    for week in list_of_weeks]
 		)
 		return [{'name': contributor.author.login,
 				'additions': extract(contributor.weeks, 'a'),
-				'deletions': extract(contributor.weeks, 'd')}
+				'deletions': extract(contributor.weeks, 'd'),
+				'commits': extract(contributor.weeks, 'c')}
 				for contributor in self.repo.get_stats_contributors()
 		]
 
@@ -78,23 +82,41 @@ class Repository(object):
 		license_name = self.repo.get_license().license.spdx_id
 		return license_name in self.osi_license_ids
 
-	def has_issues_or_prs(self):
+	def has_xtrnl_issues_or_prs(self):
 		"""
 		Returns True if the repository has Issues
 		and Pull Requests from external people.
 		"""
+
 		if not self.repo.has_issues:
 			return False
 
-		issues = self.repo.get_issues()
+		# get the issues and names of core developers
+		issues = [issue for issue in self.repo.get_issues(state='all')]
+		print(f'there is {len(issues)} issues')
+		core_dev_names = [dev['name'] for dev in self.core_developers()]
+		
+		# define lambda for fuzzy string comparison (yields true if >90% overlap)
+		fuzzy_compare = lambda string1, string2: SM(None, string1, string2).ratio() > 0.9
+
 		for issue in issues:
+
 			if issue.user == self.repo.owner:
 				continue
-			# check if author of issue or PR is from the same company
+
+			# check if author of issue or PR is from the same company that owns the repo
 			if issue.user.company is not None:
-				if issue.user.company[1:-1] == self.user.login:
-					print('same company')
-		return True # dummy return
+				if fuzzy_compare(issue.user.company, self.user.login) or fuzzy_compare(issue.user.company, self.user.name):
+					continue
+
+			# check if author of issue is a core developer
+			if issue.user.login in core_dev_names:
+					continue
+
+			else:
+				return True # one Issue from external suffices to pass the test
+
+		return False
 
 	def total_adds_and_dels(self):
 		"""
@@ -110,12 +132,12 @@ class Repository(object):
 	def core_developers(self):
 		"""
 		Returns a list of names of core
-		developers (>20% of code).
+		developers (>10% of total additions OR deletions OR >15% of total commits).
 		"""
 
 		adds_and_dels = self.total_adds_and_dels()
 
-		is_core_dev = lambda contributor: (contributor['additions']/adds_and_dels['additions'] > 0.10) or (contributor['deletions']/adds_and_dels['deletions']*-1 > 0.10)
+		is_core_dev = lambda contributor: (contributor['additions']/adds_and_dels['additions'] > 0.10) or (contributor['deletions']/adds_and_dels['deletions']*-1 > 0.10) or (contributor['commits']/self.commit_count > 0.15)
 
 		return list(filter(is_core_dev, self.get_contributors()))
 

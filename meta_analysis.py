@@ -2,6 +2,7 @@ import datetime as dt
 from functools import reduce
 from difflib import SequenceMatcher as SM
 
+from cached_property import cached_property
 from github import Github
 from config import OAUTH_TOKEN
 
@@ -23,14 +24,14 @@ class Repository(object):
 		self.repo = self.user.get_repo(repo_name)
 		self.commits = [commit for commit in self.repo.get_commits()]
 
-	@property	
+	@cached_property
 	def commit_count(self):
 		"""
 		Returns the total number of commits.
 		"""
 		return len([commit for commit in self.commits])
 
-	@property
+	@cached_property
 	def is_young(self):
 		"""
 		Returns True if the repository
@@ -38,7 +39,7 @@ class Repository(object):
 		"""
 		return (dt.datetime.now() - self.repo.created_at) > dt.timedelta(weeks=52)
 
-	@property
+	@cached_property
 	def has_recent_commits(self):
 		"""
 		Returns True if the repository had at
@@ -49,7 +50,7 @@ class Repository(object):
 		in_past_year = lambda date: (dt.datetime.now() - date) < dt.timedelta(weeks=52)
 		return any(map(in_past_year, map(extract_date, last_twenty_commits)))
 
-	@property
+	@cached_property
 	def contributor_count(self):
 		"""
 		Returns the number of contributors
@@ -57,7 +58,7 @@ class Repository(object):
 		"""	
 		return len(self.get_contributors())
 		
-	@property
+	@cached_property
 	def osi_license(self):
 		"""
 		Returns True if the license associated
@@ -66,7 +67,7 @@ class Repository(object):
 		license_name = self.repo.get_license().license.spdx_id
 		return license_name in self.osi_license_ids
 
-	@property
+	@cached_property
 	def has_xtrnl_issues_or_prs(self):
 		"""
 		Returns True if the repository has Issues
@@ -77,7 +78,7 @@ class Repository(object):
 		else:
 			return True
 
-	@property
+	@cached_property
 	def core_developers(self):
 		"""
 		Returns a list of names of core
@@ -91,7 +92,7 @@ class Repository(object):
 
 		return list(filter(is_core_dev, self.get_contributors()))
 
-	@property
+	@cached_property
 	def has_ignored_issues_and_prs(self):
 		"""
 		Returns True if more than 50% of external Issues and PRs

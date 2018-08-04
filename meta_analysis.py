@@ -49,6 +49,76 @@ class Repository(object):
 		in_past_year = lambda date: (dt.datetime.now() - date) < dt.timedelta(weeks=52)
 		return any(map(in_past_year, map(extract_date, last_twenty_commits)))
 
+	@property
+	def contributor_count(self):
+		"""
+		Returns the number of contributors
+		for this project.
+		"""	
+		return len(self.get_contributors())
+		
+	@property
+	def osi_license(self):
+		"""
+		Returns True if the license associated
+		with this repository is a valid OSI license.
+		"""
+		license_name = self.repo.get_license().license.spdx_id
+		return license_name in self.osi_license_ids
+
+	@property
+	def has_xtrnl_issues_or_prs(self):
+		"""
+		Returns True if the repository has Issues
+		and Pull Requests from external people.
+		"""
+		if not self.repo.has_issues or len(self.get_xtrnl_issues_and_prs()) == 0:
+			return False
+		else:
+			return True
+
+	@property
+	def core_developers(self):
+		"""
+		Returns a list of names of core
+		developers (>10% of total additions OR deletions OR >15% of total commits).
+		"""
+		adds_and_dels = self.get_total_adds_and_dels()
+
+		is_core_dev = lambda contributor: (contributor['additions']/adds_and_dels['additions'] > 0.10) \
+					    or (contributor['deletions']/adds_and_dels['deletions']*-1 > 0.10) \
+					    or (contributor['commits']/self.commit_count > 0.15)
+
+		return list(filter(is_core_dev, self.get_contributors()))
+
+	@property
+	def has_ignored_issues_and_prs(self):
+		"""
+		Returns True if more than 50% of external Issues and PRs
+		were ignored within their first month of existence.
+		"""
+		external_issues_and_prs = self.get_xtrnl_issues_and_prs()
+		core_dev_names = [dev['name'] for dev in self.core_developers]
+		ignorance_counter = 0
+
+		for ext_issue in external_issues_and_prs:
+			replied_on_time = False
+			for comment in ext_issue.get_comments():
+				if ext_issue.created_at - comment.created_at > dt.timedelta(weeks=4):
+					break # no one replied for one month
+				if comment.user.login in core_dev_names or self.is_part_of_company(comment.user):
+					replied_on_time = True	
+					break
+
+			if replied_on_time == False:
+				ignorance_counter += 1
+
+		# if more than 50% of Issues and PRs were ignored we consider the project abandoned
+		if ignorance_counter/len(external_issues_and_prs) > 0.50:
+			return True
+		else:
+			return False
+
 	def get_contributors(self):
 		"""
 		Returns a list of dictionaries. Each dictionary represents
@@ -65,39 +135,18 @@ class Repository(object):
 				'commits': extract(contributor.weeks, 'c')}
 				for contributor in self.repo.get_stats_contributors()
 		]
-
-	@property
-	def contributor_count(self):
+	
+	def get_xtrnl_issues_and_prs(self):
 		"""
-		Returns the number of contributors
-		for this project.
-		"""	
-		return len(self.get_contributors())
+		Returns a list of Issues and PRs from external
+		developers.
+		"""
 		
-	def osi_license(self):
-		"""
-		Returns True if the license associated
-		with this repository is a valid OSI license.
-		"""
-		license_name = self.repo.get_license().license.spdx_id
-		return license_name in self.osi_license_ids
-
-	def has_xtrnl_issues_or_prs(self):
-		"""
-		Returns True if the repository has Issues
-		and Pull Requests from external people.
-		"""
-
-		if not self.repo.has_issues:
-			return False
-
-		# get the issues and names of core developers
+		# get all issues and names of core developers
 		issues = [issue for issue in self.repo.get_issues(state='all')]
-		print(f'there is {len(issues)} issues')
-		core_dev_names = [dev['name'] for dev in self.core_developers()]
-		
-		# define lambda for fuzzy string comparison (yields true if >90% overlap)
-		fuzzy_compare = lambda string1, string2: SM(None, string1, string2).ratio() > 0.9
+		core_dev_names = [dev['name'] for dev in self.core_developers]	
+
+		external_issues_and_prs = [] # initialize an empty list
 
 		for issue in issues:
 
@@ -105,41 +154,45 @@ class Repository(object):
 				continue
 
 			# check if author of issue or PR is from the same company that owns the repo
-			if issue.user.company is not None:
-				if fuzzy_compare(issue.user.company, self.user.login) or fuzzy_compare(issue.user.company, self.user.name):
+			if self.is_part_of_company(issue.user):
 					continue
 
 			# check if author of issue is a core developer
 			if issue.user.login in core_dev_names:
 					continue
-
 			else:
-				return True # one Issue from external suffices to pass the test
+				external_issues_and_prs.append(issue)
 
-		return False
+		return external_issues_and_prs
 
-	def total_adds_and_dels(self):
+	def is_part_of_company(self, user):
+		"""
+		Returns True if user is part
+		of the company that owns the repo.
+		"""
+
+		# define lambda for fuzzy string comparison (yields true if >90% overlap)
+		fuzzy_compare = lambda string1, string2: SM(None, string1, string2).ratio() > 0.9
+
+		if user.company is None:
+			return False
+		elif fuzzy_compare(user.company, self.user.login) or fuzzy_compare(user.company, self.user.name):
+			# we use fuzzy string comparison to account for spelling or punctuation diffs
+			return True
+		else:
+			return False
+	
+	def get_total_adds_and_dels(self):
 		"""
 		Returns a dictionary with the total
 		number of additions and deletions
 		in this repository.
 		"""
 		stats = {}
-		stats['additions'] = reduce(lambda x, y: (x + y.additions) if type(x) is int else (x.additions + y.additions), self.repo.get_stats_code_frequency())
-		stats['deletions'] = reduce(lambda x, y: (x + y.deletions) if type(x) is int else (x.deletions + y.deletions), self.repo.get_stats_code_frequency())
+		stats['additions'] = reduce(lambda x, y: (x + y.additions) if type(x) is int \
+					 else (x.additions + y.additions), self.repo.get_stats_code_frequency()
+		)
+		stats['deletions'] = reduce(lambda x, y: (x + y.deletions) if type(x) is int \
+					 else (x.deletions + y.deletions), self.repo.get_stats_code_frequency()
+		)
 		return stats
-
-	def core_developers(self):
-		"""
-		Returns a list of names of core
-		developers (>10% of total additions OR deletions OR >15% of total commits).
-		"""
-
-		adds_and_dels = self.total_adds_and_dels()
-
-		is_core_dev = lambda contributor: (contributor['additions']/adds_and_dels['additions'] > 0.10) or (contributor['deletions']/adds_and_dels['deletions']*-1 > 0.10) or (contributor['commits']/self.commit_count > 0.15)
-
-		return list(filter(is_core_dev, self.get_contributors()))
-
-import bpython
-bpython.embed(locals_=locals())

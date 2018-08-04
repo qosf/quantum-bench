@@ -196,3 +196,37 @@ class Repository(object):
 					 else (x.deletions + y.deletions), self.repo.get_stats_code_frequency()
 		)
 		return stats
+	
+	def is_valid(self):
+		"""
+		Executes the entire decision tree and yields True
+		if the repo satisfies all conditions. Hence, the repo
+		is a valid OSS repo that is valuable to other and also
+		obeys good practices.	
+		"""
+
+		if not self.osi_license: 
+			print('license not okay')
+			return False
+		print('license okay')
+		if self.contributor_count == 1:
+		      print('only 1 contributor')
+		      return False
+		print('>1 contributor')
+		if not self.is_young and self.commit_count < 100:
+		      print('project is old and has less than 100 commits.')
+		      return False
+		print('project either old and has more than 100 commits or young.')
+		if self.is_young and not self.has_recent_commits:
+		      print('project is young but has too little recent commits')
+		      return False
+		print('project maybe young and enough recent commits')
+		if not self.has_xtrnl_issues_or_prs:
+		      print('project has no xtrnl issues')
+		      return False
+		print('project has xtrnl issues')
+		if self.has_ignored_issues_and_prs:
+			print('project is ignorant')
+			return False
+		print('project not ignorant')
+		return True # since it has satisfied all previous conditions

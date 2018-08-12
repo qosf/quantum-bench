@@ -1,0 +1,18 @@
+FROM fedora:27
+
+RUN dnf update -y
+RUN dnf install git -y
+
+# Setup language environment
+ENV LC_ALL en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US.UTF-8
+
+# Setup workspace
+RUN git clone https://github.com/rigetticomputing/pyquil/
+WORKDIR pyquil
+
+# Install the dependencies
+RUN pip3 install -r requirements.txt
+
+CMD ["sh", "-c", "python3 -m pytest -vv ."]

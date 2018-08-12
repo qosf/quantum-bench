@@ -11,6 +11,7 @@ from quenchmark.plugins import Collector
 @dataclass
 class Project:
     name: str
+    identifier: str
     repo_url: str
     dockerfile: str = None
 
@@ -36,7 +37,10 @@ class EntryPoint(LoggerMixin):
         """
 
         config = yaml.load(open('config.yaml', 'r'))
-        self.projects = [Project(**spec) for spec in config['projects'].values()]
+        self.projects = [
+            Project(identifier=identifier, **spec)
+            for identifier, spec in config['projects'].items()
+        ]
 
     def collect_data(self):
         """

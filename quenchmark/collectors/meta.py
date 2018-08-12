@@ -1,4 +1,4 @@
-from plugins import Collector
+from quenchmark.plugins import Collector
 
 class MetaCollector(Collector):
 

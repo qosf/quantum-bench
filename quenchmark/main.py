@@ -1,10 +1,10 @@
 import importlib
-from logger import LoggerMixin
+from quenchmark.logger import LoggerMixin
 
 import yaml
 
-import collectors
-from plugins import Collector
+import quenchmark.collectors as collectors
+from quenchmark.plugins import Collector
 
 
 class EntryPoint(LoggerMixin):

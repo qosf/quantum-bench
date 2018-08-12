@@ -1,5 +1,5 @@
-from logger import LoggerMixin
-from utils import classproperty
+from quenchmark.logger import LoggerMixin
+from quenchmark.utils import classproperty
 
 
 class NoSuchPlugin(Exception):

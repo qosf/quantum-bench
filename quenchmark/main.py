@@ -48,10 +48,22 @@ class EntryPoint(LoggerMixin):
         collectors.
         """
 
+        data = {}
+
         for project in self.projects:
+            project_data = {}
+
             for plugin_cls in Collector.plugin_classes:
                 plugin = plugin_cls()
-                plugin.run(project)
+                new_data = plugin.run(project) or {}
+                if set(data.keys()) & set(new_data.keys()):
+                    raise Exception("Duplicate key")
+
+                project_data.update(new_data)
+
+            data[project.identifier] = project_data
+
+        return data
 
     def main(self):
         self.import_plugins()

@@ -1,0 +1,7 @@
+projects:
+    qutip:
+      name: QuTip
+      repo_url: https://github.com/qutip/qutip
+    strawberryfields:
+      name: Strawberry Fields
+      repo_url: https://github.com/xanaduai/strawberryfields

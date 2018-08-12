@@ -1,4 +1,5 @@
 import importlib
+import pprint
 from dataclasses import dataclass
 
 import yaml
@@ -68,7 +69,7 @@ class EntryPoint(LoggerMixin):
     def main(self):
         self.import_plugins()
         self.load_configuration()
-        self.collect_data()
+        pprint.pprint(self.collect_data())
 
 
 def main():

@@ -39,9 +39,15 @@ class EntryPoint(LoggerMixin):
         self.projects = [Project(**spec) for spec in config['projects'].values()]
 
     def collect_data(self):
-        for plugin_cls in Collector.plugin_classes:
-            plugin = plugin_cls()
-            plugin.run()
+        """
+        Collect data for every project using all available (applicable)
+        collectors.
+        """
+
+        for project in self.projects:
+            for plugin_cls in Collector.plugin_classes:
+                plugin = plugin_cls()
+                plugin.run(project)
 
     def main(self):
         self.import_plugins()

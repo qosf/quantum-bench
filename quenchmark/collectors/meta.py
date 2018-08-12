@@ -2,6 +2,6 @@ from quenchmark.plugins import Collector
 
 class MetaCollector(Collector):
 
-    def run(self):
+    def run(self, project):
 
-        self.info("I was here")
+        self.info(f"I was here for project: {project.name}")

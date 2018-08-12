@@ -1,10 +1,18 @@
 import importlib
-from quenchmark.logger import LoggerMixin
+from dataclasses import dataclass
 
 import yaml
 
 import quenchmark.collectors as collectors
+from quenchmark.logger import LoggerMixin
 from quenchmark.plugins import Collector
+
+
+@dataclass
+class Project:
+    name: str
+    repo_url: str
+    dockerfile: str = None
 
 
 class EntryPoint(LoggerMixin):
@@ -28,7 +36,7 @@ class EntryPoint(LoggerMixin):
         """
 
         config = yaml.load(open('config.yaml', 'r'))
-        self.projects = [Project.parse(spec) for spec in config['projects']]
+        self.projects = [Project(**spec) for spec in config['projects'].values()]
 
     def collect_data(self):
         for plugin_cls in Collector.plugin_classes:

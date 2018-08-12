@@ -5,3 +5,63 @@ projects:
     strawberryfields:
       name: Strawberry Fields
       repo_url: https://github.com/xanaduai/strawberryfields
+    QISKit-terra:
+      name: QISKit Terra
+      repo_url: https://github.com/Qiskit/qiskit-terra
+    cirq:
+      name: Cirq
+      repo_url: https://github.com/quantumlib/Cirq
+    pyquil:
+      name: PyQuil
+      repo_url: https://github.com/rigetticomputing/pyquil
+    ProjectQ:
+      name: ProjectQ
+      repo_url: https://github.com/ProjectQ-Framework/ProjectQ
+    XACC:
+      name: XACC
+      repo_url: https://github.com/eclipse/xacc
+    PIQS:
+      name: PIQS
+      repo_url: https://github.com/nathanshammah/piqs
+    QuTiP:
+      name: QuTiP
+      repo_url: https://github.com/qutip/qutip
+    qpp:
+      name: Quantum++
+      repo_url: https://github.com/vsoftco/qpp
+    Qrack:
+      name: Qrack
+      repo_url: https://github.com/vm6502q/qrack
+    Quirk:
+      name: Quirk
+      repo_url: https://github.com/Strilanc/Quirk
+    QCGPU:
+      name: QCGPU
+      repo_url: https://github.com/QCGPU/qcgpu-rust
+    Cliffords.jl:
+      name: Cliffords.jl
+      repo_url: https://github.com/BBN-Q/Cliffords.jl
+    Qbsolv:
+      name: Qbsolv
+      repo_url: https://github.com/dwavesystems/qbsolv
+    Dimod:
+      name: Dimod
+      repo_url: https://github.com/dwavesystems/dimod
+    DWave-system:
+      name: D-Wave System
+      repo_url: https://github.com/dwavesystems/dwave-system
+    DWave-cloud-client:
+      name: D-Wave Cloud Client
+      repo_url: https://github.com/dwavesystems/dwave-cloud-client
+    grove:
+      name: Grove
+      repo_url: https://github.com/rigetticomputing/grove
+    qiskit-aqua:
+      name: QISKit Aqua
+      repo_url: https://github.com/Qiskit/aqua
+    OpenFermion:
+      name: OpenFermion
+      repo_url: https://github.com/quantumlib/OpenFermion
+    ScaffCC:
+      name: ScaffCC
+      repo_url: https://github.com/epiqc/ScaffCC

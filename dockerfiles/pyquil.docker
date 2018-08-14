@@ -14,5 +14,7 @@ WORKDIR pyquil
 
 # Install the dependencies
 RUN pip3 install -r requirements.txt
+RUN pip3 install pytest-coverage coverage
+ADD coveragerc .coveragerc
 
-CMD ["sh", "-c", "python3 -m pytest -vv ."]
+CMD ["sh", "-c", "python3 -m pytest --cov -vv ."]

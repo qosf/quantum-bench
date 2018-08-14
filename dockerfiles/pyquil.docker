@@ -20,4 +20,4 @@ RUN pip3 install pytest-coverage coverage
 ADD dockerfiles/pyquil.coverage .coveragerc
 RUN mkdir reports
 
-CMD ["sh", "-c", "python3 -m pytest --cov --cov-report=term --cov-report=xml:reports/coverage.xml -vv ."]
+CMD ["sh", "-c", "python3 -m pytest --cov --cov-report=term --cov-report=xml:/reports/coverage.xml -vv ."]

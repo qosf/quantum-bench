@@ -3,7 +3,7 @@ from functools import reduce
 from difflib import SequenceMatcher as SM
 
 from cached_property import cached_property
-from github import Github
+import github
 
 from quenchmark.config import OAUTH_TOKEN
 from quenchmark.plugins import Collector
@@ -22,8 +22,8 @@ class MetaCollector(Collector):
         and already retrieves a list of all commits.
         """
         # create a Github instance with OAuth token
-        self.github = Github(OAUTH_TOKEN)
-        
+        self.github = github.Github(OAUTH_TOKEN)
+
         # adding @ ensures finding users exactly
         self.user = self.github.search_users('@'+user_name)[0]
         self.repo = self.user.get_repo(repo_name)

@@ -18,10 +18,14 @@ class TestCollector(Collector):
         self.info(stdout)
         self.info(stderr)
 
+        import os
+        os.makedirs('/tmp/quenchmark/reports/', exist_ok=True)
+
         stdout, stderr, returncode = run([
           'docker',
           'run',
           '--network=host',
+          '-v', '/tmp/quenchmark/reports/:/reports/:rw',
           f'qosstest_{project.identifier}',
         ])
         self.info(stdout)

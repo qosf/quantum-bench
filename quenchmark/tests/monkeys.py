@@ -3,24 +3,26 @@ Monkey classes to patch the PyGithub functionality
 with unittest.mock in the tests.
 """
 
-import datetime as dt
-
 class MonkeyGithub():
     search_users = lambda self, x: [MonkeyUser()]
 
 class MonkeyUser():
-    get_repo = lambda self, y: YoungMonkeyRepo() # just passing the young repo as default
+    get_repo = lambda self, y: MonkeyRepo()
 
-class YoungMonkeyRepo():
+class MonkeyRepo():
     get_commits = lambda self: list(range(10))
     @property
     def created_at(self, *args):
-        return dt.datetime.now() - dt.timedelta(weeks=30)
+         return ValueError # raising error to ensure override in actual tests
+    get_license = lambda self: MonkeyContentFile()
 
-class OldMonkeyRepo():
-    get_commits = lambda self: list(range(10))
+class MonkeyContentFile():
     @property
-    def created_at(self, *args):
-        return dt.datetime.now() - dt.timedelta(weeks=180)
+    def license(self):
+        return MonkeyLicense()
 
+class MonkeyLicense():
+    @property
+    def spdx_id(self):
+        return ValueError # raising error to ensure override in actual tests
 

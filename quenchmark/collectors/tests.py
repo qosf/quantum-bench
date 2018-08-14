@@ -27,4 +27,4 @@ class TestCollector(Collector):
         self.info(stdout)
         self.info(stderr)
 
-        return {'result_dummy': project.name}
+        return {'result_test': project.name}

@@ -14,6 +14,7 @@ projects:
     pyquil:
       name: PyQuil
       repo_url: https://github.com/rigetticomputing/pyquil
+      dockerfile: dockerfiles/pyquil.docker
     ProjectQ:
       name: ProjectQ
       repo_url: https://github.com/ProjectQ-Framework/ProjectQ

@@ -29,6 +29,7 @@ class TestCollector(Collector):
           'run',
           '--network=host',
           '-v', '/tmp/quenchmark/reports/:/reports/:rw',
+          '--security-opt', 'label=type:container_runtime_t',
           f'qosstest_{project.identifier}',
         ])
         self.info(stdout)

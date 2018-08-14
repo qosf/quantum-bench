@@ -5,32 +5,38 @@ import pytest
 import github
 
 from quenchmark.collectors.meta import MetaCollector
+import monkeys
 
-class MonkeyGithub(object):
-    @classmethod
-    def get_repo(cls, *args, **kwargs):
-        return cls
-    def get_commits(*args, **kwargs):
-        return ['Commit #1', 'Commit #2', 3, 4, 5, 6, 7, 8, 9, 10]
-
-@patch('github.Github.search_users', mock.MagicMock(return_value=[MonkeyGithub()]))
-@patch('github.Github.__init__', mock.MagicMock(return_value=None))
+@patch('github.Github', mock.MagicMock(return_value=monkeys.MonkeyGithub()))
 def test_init():
     """
     Tests the instantiation of a Repository object.
     """
-    #github_mock.return_value = None
-    #github_mock.search_users.return_value = 'TestUser'
-    #user_mock.get_repo.return_value = 'TestRepo'
-    #github_mock.commits.return_value = 'TestCommits'
-    
-    repo = MetaCollector('RepoOwner', 'RepoName')
+    repo = MetaCollector('TestRepoOwner', 'TestRepoName')
 
-@patch('github.Github.search_users', mock.MagicMock(return_value=[MonkeyGithub()]))
-@patch('github.Github.__init__', mock.MagicMock(return_value=None))
+@patch('github.Github', mock.MagicMock(return_value=monkeys.MonkeyGithub()))
 def test_commit_count():
     """
     Testing if >100 commits really results in True.
     """
-    #init_mock.commits.return_value = list(range(10))
-    assert MetaCollector('RepoOwner', 'RepoName').commit_count == 10
+    assert MetaCollector('TestRepoOwner', 'TestRepoName').commit_count == 10
+
+@patch('monkeys.MonkeyUser.get_repo')
+@patch('github.Github.search_users', mock.MagicMock(return_value=[monkeys.MonkeyUser()]))
+@patch('github.Github.__init__', mock.MagicMock(return_value=None))
+def test_is_young(repo_mock):
+    """
+    Testing if a project is young (< 1 year).
+    """
+    repo_mock.return_value = monkeys.YoungMonkeyRepo()
+    assert MetaCollector('TestRepoOwner', 'TestRepoName').is_young == True
+    repo_mock.return_value = monkeys.OldMonkeyRepo()
+    assert MetaCollector('TestRepoOwner', 'TestRepoName').is_young == False
+
+
+@patch('github.Github', mock.MagicMock(return_value=monkeys.MonkeyGithub()))
+def test_has_recent_commits():
+    """
+    Testing if a project had at least 20 commits in the past year.
+    """
+    assert MetaCollector('TestRepoOwner', 'TestRepoName').is_young == True

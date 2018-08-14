@@ -31,4 +31,9 @@ class TestCollector(Collector):
         self.info(stdout)
         self.info(stderr)
 
+        import xml.etree.ElementTree as ET
+        tree = ET.parse('/tmp/quenchmark/reports/coverage.xml')
+        root = tree.getroot()
+        self.info(f"{root.attrib}")
+
         return {'result_test': project.name}

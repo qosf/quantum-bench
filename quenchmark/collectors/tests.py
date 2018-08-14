@@ -1,3 +1,6 @@
+import os
+from xml.etree import ElementTree
+
 from quenchmark.plugins import Collector
 from quenchmark.utils import run
 
@@ -18,7 +21,7 @@ class TestCollector(Collector):
         self.info(stdout)
         self.info(stderr)
 
-        import os
+        # Create coverage storage
         os.makedirs('/tmp/quenchmark/reports/', exist_ok=True)
 
         stdout, stderr, returncode = run([
@@ -31,8 +34,7 @@ class TestCollector(Collector):
         self.info(stdout)
         self.info(stderr)
 
-        import xml.etree.ElementTree as ET
-        tree = ET.parse('/tmp/quenchmark/reports/coverage.xml')
+        tree = ElementTree.parse('/tmp/quenchmark/reports/coverage.xml')
         root = tree.getroot()
         self.info(f"{root.attrib}")
 

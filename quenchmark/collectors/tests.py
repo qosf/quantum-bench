@@ -9,15 +9,20 @@ class TestCollector(Collector):
             self.info("Dockerfile not present")
             return {}
 
-        run([
+        stdout, stderr, returncode = run([
           'docker', 'build',
           '-t', f'qosstest_{project.identifier]',
           '.'
         ])
-        run([
+        self.info(stdout)
+        self.info(stderr)
+
+        stdout, stderr, returncode = run([
           'docker',
           'run',
           f'qosstest_{project.identifier]',
         ])
+        self.info(stdout)
+        self.info(stderr)
 
         return {'result_dummy': project.name}

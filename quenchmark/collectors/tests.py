@@ -11,7 +11,8 @@ class TestCollector(Collector):
 
         stdout, stderr, returncode = run([
           'docker', 'build',
-          '-t', f'qosstest_{project.identifier]',
+          '-t', f'qosstest_{project.identifier}',
+          '-f', project.dockerfile,
           '.'
         ])
         self.info(stdout)
@@ -20,7 +21,8 @@ class TestCollector(Collector):
         stdout, stderr, returncode = run([
           'docker',
           'run',
-          f'qosstest_{project.identifier]',
+          '--network=host',
+          f'qosstest_{project.identifier}',
         ])
         self.info(stdout)
         self.info(stderr)

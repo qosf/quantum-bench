@@ -42,7 +42,7 @@ class MetaCollector(Collector):
         Returns True if the repository
         is younger than one year.
         """
-        return (dt.datetime.now() - self.repo.created_at) > dt.timedelta(weeks=52)
+        return (dt.datetime.now() - self.repo.created_at) < dt.timedelta(weeks=52)
 
     @cached_property
     def has_recent_commits(self):
@@ -239,4 +239,3 @@ class MetaCollector(Collector):
             return False
         print('project not ignorant')
         return True # since it has satisfied all previous conditions
->>>>>>> updated meta.py with actual code

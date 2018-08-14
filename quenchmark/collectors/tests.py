@@ -39,4 +39,8 @@ class TestCollector(Collector):
         root = tree.getroot()
         self.info(f"{root.attrib}")
 
-        return {'result_test': project.name}
+        return {
+            'coverage_total_lines': root.attrib['lines-valid'],
+            'coverage_covered_lines': root.attrib['lines-covered'],
+            'coverage_fraction': root.attrib['line-rate']
+        }

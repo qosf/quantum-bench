@@ -68,3 +68,27 @@ def test_osi_license(license_mock):
     assert MetaCollector('TestRepoOwner', 'TestRepoName').osi_license == False
     license_mock.return_value.spdx_id = 'GPL-2.0'
     assert MetaCollector('TestRepoOwner', 'TestRepoName').osi_license == True
+
+@patch('github.Github', mock.MagicMock(return_value=monkeys.MonkeyGithub()))
+def test_has_xtrnl_issues_or_prs():
+    """
+    Testing if the repo has external Issues or PRs.
+    """
+    pass #TODO
+
+@patch('monkeys.MonkeyStatsContributor')
+@patch('monkeys.MonkeyRepo')
+@patch('github.Github', mock.MagicMock(return_value=monkeys.MonkeyGithub()))
+def test_get_contributors(repo_mock, stats_mock):
+    """
+    Getting the list of contributors for a project.
+    """
+    repo_mock.return_value.get_stats_contributors.return_value = [monkeys.MonkeyStatsContributor() for i in range(5)]
+    stats_mock.return_value.weeks = [monkeys.MonkeyWeeks() for i in range(5)]
+    stats_mock.return_value.author= monkeys.MonkeyUser()
+    contributor_list = [{'additions': 500, 'commits': 250, 'deletions': 1000, 'name': 'Peter Shor'},
+            {'additions': 500, 'commits': 250, 'deletions': 1000, 'name': 'Peter Shor'},
+            {'additions': 500, 'commits': 250, 'deletions': 1000, 'name': 'Peter Shor'},
+            {'additions': 500, 'commits': 250, 'deletions': 1000, 'name': 'Peter Shor'},
+            {'additions': 500, 'commits': 250, 'deletions': 1000, 'name': 'Peter Shor'}]
+    assert MetaCollector('TestRepoOwner', 'TestRepoName').get_contributors() == contributor_list

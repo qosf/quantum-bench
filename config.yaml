@@ -5,6 +5,7 @@ projects:
     strawberryfields:
       name: Strawberry Fields
       repo_url: https://github.com/xanaduai/strawberryfields
+      dockerfile: dockerfiles/strawberryfields.docker
     QISKit-terra:
       name: QISKit Terra
       repo_url: https://github.com/Qiskit/qiskit-terra

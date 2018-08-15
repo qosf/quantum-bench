@@ -1,0 +1,23 @@
+FROM fedora:27
+
+RUN dnf update -y
+RUN dnf install git -y
+
+# Setup language environment
+ENV LC_ALL en_US.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US.UTF-8
+
+# Setup workspace
+RUN git clone https://github.com/xanaduai/strawberryfields
+WORKDIR strawberryfields
+
+# Install the dependencies
+RUN pip3 install -r requirements.txt
+RUN pip3 install pytest-coverage coverage
+
+# Prepare the coverage
+ADD dockerfiles/strawberryfields.coverage .coveragerc
+RUN mkdir reports
+
+CMD ["sh", "-c", "python3 -m pytest --cov --cov-report=term --cov-report=xml:/reports/coverage.xml -vv ."]
